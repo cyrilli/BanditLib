@@ -403,7 +403,6 @@ def pca_articles(articles, order):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = '')
-    parser.add_argument('--alg', dest='alg', help='Select a specific algorithm, could be CoLin, hLinUCB, factorUCB, LinUCB, etc.')
     parser.add_argument('--contextdim', type=int, help='Set dimension of context features.')
     parser.add_argument('--hiddendim', type=int, help='Set dimension of hidden features.')
 
