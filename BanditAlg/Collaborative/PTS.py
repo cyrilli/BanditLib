@@ -1,6 +1,5 @@
 import numpy as np
 import scipy.stats
-from BaseAlg import BaseAlg
 
 class PTSArticleStruct:
 	def __init__(self, id, dimension, sigma, sigmaV, init="zero"):
@@ -78,33 +77,41 @@ class PTSParticleStruct:
 		for i in range(itemNum):
 			self.articles.append(PTSArticleStruct(i, dimension, sigma, sigmaV,))
 
-class PTSAlgorithm(BaseAlg):
-	def __init__(self, arg_dict):  # n is number of users
-		BaseAlg.__init__(self, arg_dict)
+class PTSAlgorithm:
+	def __init__(self, particle_num, dimension,  n, itemNum, sigma, sigmaU, sigmaV,):  # n is number of users
+		self.sigma = sigma
+		self.dimension = dimension
+		self.particle_num = particle_num
 		self.particles = [] # Particles
-		for i in range(self.particle_num):
-			self.particles.append(PTSParticleStruct(self.dimension, self.n_users, self.itemNum, self.sigma, self.sigmaU, self.sigmaV, 1.0/self.particle_num))
+		for i in range(particle_num):
+			self.particles.append(PTSParticleStruct(dimension, n, itemNum, sigma, sigmaU, sigmaV, 1.0/particle_num))
+
+
 		self.time = 0
 
-	def decide(self, pool_articles, userID, k = 1):
+		self.CanEstimateUserPreference = False
+		self.CanEstimateCoUserPreference = False
+		self.CanEstimateW = False
+		self.CanEstimateV = False
+	def decide(self, pool_articles, userID):
 
 		#Sample a Particle
 		d = np.random.choice(self.particle_num, p = [p.weight for p in self.particles])
 		p = self.particles[d]
 		#For PTS-B
-		articles = []
-		for i in range(k):
-			maxPTA = float('-inf')
-			articlePicked = None
 
-			for x in pool_articles:
-				x_pta = p.users[userID].U.dot(p.articles[x.id].V)
-				# pick article with highest Prob
-				if maxPTA < x_pta and x not in articles:
-					articlePicked = x
-					maxPTA = x_pta
-			articles.append(articlePicked)
-		return articles
+
+		maxPTA = float('-inf')
+		articlePicked = None
+
+		for x in pool_articles:
+			x_pta = p.users[userID].U.dot(p.articles[x.id].V)
+			# pick article with highest Prob
+			# print x_pta 
+			if maxPTA < x_pta:
+				articlePicked = x
+				maxPTA = x_pta				
+		return articlePicked
 
 	def updateParameters(self, articlePicked, click, userID):
 		self.time += 1

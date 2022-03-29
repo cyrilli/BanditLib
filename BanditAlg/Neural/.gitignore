@@ -1,0 +1,8 @@
+.project
+.pydevproject
+*.pyc
+./SimulationResults/*
+/SimulationResults/
+.idea
+.vscode/
+Results/

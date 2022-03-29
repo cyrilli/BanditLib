@@ -2,6 +2,28 @@ from collections import Counter
 from math import log
 import numpy as np 
 from random import *
+from sklearn.decomposition import PCA
+
+def pca_articles(articles, order):
+    X = []
+    for i, article in enumerate(articles):
+        X.append(article.featureVector)
+    pca = PCA()
+    X_new = pca.fit_transform(X)
+    # X_new = np.asarray(X)
+    print('pca variance in each dim:', pca.explained_variance_ratio_) 
+
+    print(X_new)
+    #default is descending order, where the latend features use least informative dimensions.
+    if order == 'random':
+        np.random.shuffle(X_new.T)
+    elif order == 'ascend':
+        X_new = np.fliplr(X_new)
+    elif order == 'origin':
+        X_new = X
+    for i, article in enumerate(articles):
+        articles[i].featureVector = X_new[i]
+    return
 
 def sigmoid(x):
     return 1/(1+np.exp(-x))

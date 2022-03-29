@@ -1,9 +1,44 @@
 import numpy as np
-from LinUCB import *
 import math
 from scipy.sparse.csgraph import connected_components
 from scipy.sparse import csr_matrix
-from BaseAlg import BaseAlg
+
+class LinUCBUserStruct:
+	def __init__(self, featureDimension, lambda_, init="zero"):
+		self.d = featureDimension
+		self.A = lambda_*np.identity(n = self.d)
+		self.b = np.zeros(self.d)
+		self.AInv = np.linalg.inv(self.A)
+		if (init=="random"):
+			self.UserTheta = np.random.rand(self.d)
+		else:
+			self.UserTheta = np.zeros(self.d)
+		self.time = 0
+
+	def updateParameters(self, articlePicked_FeatureVector, click):
+		self.A += np.outer(articlePicked_FeatureVector,articlePicked_FeatureVector)
+		self.b += articlePicked_FeatureVector*click
+		self.AInv = np.linalg.inv(self.A)
+		self.UserTheta = np.dot(self.AInv, self.b)
+		self.time += 1
+	def getTheta(self):
+		return self.UserTheta
+	
+	def getA(self):
+		return self.A
+
+	def getProb(self, alpha, article_FeatureVector):
+		if alpha == -1:
+			alpha = alpha = 0.1*np.sqrt(np.log(self.time+1))
+		mean = np.dot(self.UserTheta,  article_FeatureVector)
+		var = np.sqrt(np.dot(np.dot(article_FeatureVector, self.AInv),  article_FeatureVector))
+		pta = mean + alpha * var
+		return pta
+	def getProb_plot(self, alpha, article_FeatureVector):
+		mean = np.dot(self.UserTheta,  article_FeatureVector)
+		var = np.sqrt(np.dot(np.dot(article_FeatureVector, self.AInv),  article_FeatureVector))
+		pta = mean + alpha * var
+		return pta, mean, alpha * var
 
 class CLUBUserStruct(LinUCBUserStruct):
 	def __init__(self,featureDimension,  lambda_, userID):
@@ -45,47 +80,51 @@ class CLUBUserStruct(LinUCBUserStruct):
 		pta = mean +  alpha * var*np.sqrt(math.log10(time+1))
 		return pta
 
-class CLUBAlgorithm(BaseAlg):
-	def __init__(self, arg_dict):
-		BaseAlg.__init__(self, arg_dict)
+class CLUBAlgorithm():
+	def __init__(self,dimension,alpha,lambda_,n,alpha_2, cluster_init="Complete"):
 		self.time = 0
 		#N_LinUCBAlgorithm.__init__(dimension = dimension, alpha=alpha,lambda_ = lambda_,n=n)
 		self.users = []
 		#algorithm have n users, each user has a user structure
-		for i in range(self.n):
-			self.users.append(CLUBUserStruct(self.dimension,self.lambda_, i)) 
-		if (self.cluster_init=="Erdos-Renyi"):
-			p = 3*math.log(self.n)/self.n
-			self.Graph = np.random.choice([0, 1], size=(self.n,self.n), p=[1-p, p])
+		for i in range(n):
+			self.users.append(CLUBUserStruct(dimension,lambda_, i)) 
+
+		self.dimension = dimension
+		self.alpha = alpha
+		self.alpha_2 = alpha_2
+		if (cluster_init=="Erdos-Renyi"):
+			p = 3*math.log(n)/n
+			self.Graph = np.random.choice([0, 1], size=(n,n), p=[1-p, p])
 			self.clusters = []
 			g = csr_matrix(self.Graph)
 			N_components, components = connected_components(g)
 		else:
-			self.Graph = np.ones([self.n,self.n]) 
+			self.Graph = np.ones([n,n]) 
 			self.clusters = []
 			g = csr_matrix(self.Graph)
 			N_components, components = connected_components(g)
 
+		self.CanEstimateCoUserPreference = False
+		self.CanEstimateUserPreference = False
+		self.CanEstimateW = False
+		self.CanEstimateV = False
 			
-	def decide(self,pool_articles,userID, k = 1):
+	def decide(self,pool_articles,userID):
 		self.users[userID].updateParametersofClusters(self.clusters,userID,self.Graph, self.users)
-		articles = []
-		for i in range(k):
-			maxPTA = float('-inf')
-			articlePicked = None
+		maxPTA = float('-inf')
+		articlePicked = None
 
-			for x in pool_articles:
-				x_pta = self.users[userID].getProb(self.alpha, x.contextFeatureVector[:self.dimension],self.time)
-				# pick article with highest Prob
-				if maxPTA < x_pta and x not in articles:
-					articlePicked = x.id
-					featureVectorPicked = x.contextFeatureVector[:self.dimension]
-					picked = x
-					maxPTA = x_pta
-			articles.append(picked)
+		for x in pool_articles:
+			x_pta = self.users[userID].getProb(self.alpha, x.contextFeatureVector[:self.dimension],self.time)
+			# pick article with highest Prob
+			if maxPTA < x_pta:
+				articlePicked = x.id
+				featureVectorPicked = x.contextFeatureVector[:self.dimension]
+				picked = x
+				maxPTA = x_pta
 		self.time +=1
 
-		return articles
+		return picked
 	def updateParameters(self, articlePicked, click,userID):
 		self.users[userID].updateParameters(articlePicked.contextFeatureVector[:self.dimension], click, self.alpha_2)
 	def updateGraphClusters(self,userID, binaryRatio):

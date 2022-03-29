@@ -1,7 +1,5 @@
 import numpy as np
 from util_functions import vectorize, matrixize
-from BaseAlg import BaseAlg
-
 class FactorUCBArticleStruct:
 	def __init__(self, id, context_dimension, latent_dimension, lambda_, W, init="zero", context_feature=None):
 		self.W = W
@@ -118,15 +116,22 @@ class FactorUCBUserStruct:
 		else:
 			return 0
 
-class FactorUCBAlgorithm(BaseAlg):
-	def __init__(self, arg_dict, init='random', window_size = 1, max_window_size = 10):  # n is number of users
-		BaseAlg.__init__(self, arg_dict)
-		self.d = self.dimension + self.latent_dimension
+class FactorUCBAlgorithm:
+	def __init__(self, context_dimension, latent_dimension, alpha, alpha2, lambda_, n, itemNum, W, init="zero", window_size = 1, max_window_size = 10):  # n is number of users
+
+		self.context_dimension = context_dimension
+		self.latent_dimension = latent_dimension
+		self.d = context_dimension + latent_dimension
+		self.W = W
 		
-		self.USERS = FactorUCBUserStruct(self.dimension, self.latent_dimension, self.lambda_ , self.n, self.W, init)
+		self.USERS = FactorUCBUserStruct(context_dimension, latent_dimension, lambda_ , n, W, init)
 		self.articles = []
-		for i in range(self.itemNum):
-			self.articles.append(FactorUCBArticleStruct(i, self.dimension, self.latent_dimension, self.lambda_, self.W, init)) 
+		for i in range(itemNum):
+			# print (i)
+			self.articles.append(FactorUCBArticleStruct(i, context_dimension, latent_dimension, lambda_, W, init)) 
+
+		self.alpha = alpha
+		self.alpha2 = alpha2
 
 		if window_size == -1:
 			self.increase_window = True
@@ -137,30 +142,31 @@ class FactorUCBAlgorithm(BaseAlg):
 		self.max_window_size = max_window_size
 		self.window = []
 		self.time = 0
+		self.CanEstimateUserPreference = False
+		self.CanEstimateCoUserPreference = True 
+		self.CanEstimateW = False
+		self.CanEstimateV = True
+	def decide(self, pool_articles, userID):
+		maxPTA = float('-inf')
+		articlePicked = None
 
-	def decide(self, pool_articles, userID, k = 1):
-		articles = []
-		for i in range(k):
-			maxPTA = float('-inf')
-			articlePicked = None
+		for x in pool_articles:
+			self.articles[x.id].V[:self.context_dimension] = x.contextFeatureVector[:self.context_dimension]
+			x_pta = self.USERS.getProb(self.alpha, self.alpha2, self.articles[x.id], userID)
 
-			for x in pool_articles:
-				self.articles[x.id].V[:self.dimension] = x.contextFeatureVector[:self.dimension]
-				x_pta = self.USERS.getProb(self.alpha, self.alpha2, self.articles[x.id], userID)
-
-				# pick article with highest Prob
-				# print x_pta 
-				if maxPTA < x_pta and x not in articles:
-					articlePicked = x
-					maxPTA = x_pta
-			articles.append(articlePicked)
-		return articles
+			# pick article with highest Prob
+			# print x_pta 
+			if maxPTA < x_pta:
+				articlePicked = x
+				maxPTA = x_pta
+				
+		return articlePicked
 
 	def getProb(self, pool_articles, userID):
 		means = []
 		vars = []
 		for x in pool_articles:
-			self.articles[x.id].V[:self.dimension] = x.contextFeatureVector[:self.dimension]
+			self.articles[x.id].V[:self.context_dimension] = x.contextFeatureVector[:self.context_dimension]
 			x_pta, mean, var = self.USERS.getProb_plot(self.alpha, self.alpha2, self.articles[x.id], userID)
 			means.append(mean)
 			vars.append(var)
@@ -178,6 +184,19 @@ class FactorUCBAlgorithm(BaseAlg):
 			self.USERS.updateParameters(articles, clicks, userID)
 			for articlePicked, click, userID in self.window:
 				self.articles[articlePicked.id].updateParameters(self.USERS, click, userID)
+			# for articlePicked, click, userID in self.window:
+			# 	article = self.articles[articlePicked.id]
+
+			# 	#self.articles[articlePicked.id].A2 -= (article.getCount(userID))*np.outer(user.U[self.context_dimension:], user.U[self.context_dimension:])
+			# 	self.USERS.updateParameters(self.articles[articlePicked.id], click, userID)
+			
+			# for articlePicked, click, userID in self.window:
+			# 	#self.articles[articlePicked.id].A2 += (article.getCount(userID)-1)*np.outer(user.U[self.context_dimension:], user.U[self.context_dimension:])
+
+			# 	# self.users[userID].A -= (user.getCount(articlePicked.id))*np.outer(article.V, article.V)
+			# 	self.articles[articlePicked.id].updateParameters(self.USERS, click, userID)
+			# 	article = self.articles[articlePicked.id]
+			# 	# self.users[userID].A += (user.getCount(articlePicked.id)-1)*np.outer(article.V, article.V)
 			self.window = []
 			if self.increase_window == True:
 				self.window_size = min(self.window_size+1, self.max_window_size)

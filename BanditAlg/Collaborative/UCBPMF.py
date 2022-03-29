@@ -1,7 +1,5 @@
 import numpy as np
 import scipy.stats
-from BaseAlg import BaseAlg
-
 
 class UCBPMFArticleStruct:
 	def __init__(self, id, dimension, sigma, sigmaV, init="zero"):
@@ -74,32 +72,36 @@ class UCBPMFUserStruct:
 		var = np.sqrt(np.trace(self.AInv.T.dot(article.A2Inv) + self.AInv.T.dot(np.outer(article.V, article.V)) + np.outer(self.U, self.U).dot(article.A2Inv)))
 		pta = mean + alpha * var
 		return pta
-
-class UCBPMFAlgorithm(BaseAlg):
-	def __init__(self, arg_dict):  # n is number of users
-		BaseAlg.__init__(self, arg_dict)
+class UCBPMFAlgorithm:
+	def __init__(self, dimension,  n, itemNum, sigma, sigmaU, sigmaV,alpha=0.0):  # n is number of users
+		self.alpha = alpha
+		self.sigma = sigma
+		self.dimension = dimension
 		self.users = []
-		for i in range(self.n_users):
-			self.users.append(UCBPMFUserStruct(i, self.dimension, self.sigma, self.sigmaU,))
+		for i in range(n):
+			self.users.append(UCBPMFUserStruct(i, dimension, sigma, sigmaU,))
 		self.articles = []
-		for i in range(self.itemNum):
-			self.articles.append(UCBPMFArticleStruct(i, self.dimension, self.sigma, self.sigmaV,))
+		for i in range(itemNum):
+			self.articles.append(UCBPMFArticleStruct(i, dimension, sigma, sigmaV,))
 		self.time = 0
 
-	def decide(self, pool_articles, userID, k = 1):
-		articles = []
-		for i in range(k):
-			maxPTA = float('-inf')
-			articlePicked = None
+		self.CanEstimateUserPreference = False
+		self.CanEstimateCoUserPreference = False
+		self.CanEstimateW = False
+		self.CanEstimateV = False
+	def decide(self, pool_articles, userID):
 
-			for x in pool_articles:
-				x_pta = self.users[userID].getProb(self.alpha, self.articles[x.id])
-				# pick article with highest Prob
-				if maxPTA < x_pta and x not in articles:
-					articlePicked = x
-					maxPTA = x_pta
-			articles.append(articlePicked)
-		return articles
+		maxPTA = float('-inf')
+		articlePicked = None
+
+		for x in pool_articles:
+			x_pta = self.users[userID].getProb(self.alpha, self.articles[x.id])
+			# pick article with highest Prob
+			# print x_pta 
+			if maxPTA < x_pta:
+				articlePicked = x
+				maxPTA = x_pta				
+		return articlePicked
 
 	def updateParameters(self, articlePicked, click, userID):
 		self.time += 1
