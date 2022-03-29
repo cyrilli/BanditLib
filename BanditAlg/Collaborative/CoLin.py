@@ -134,6 +134,9 @@ class CoLinUCBAlgorithm:
 	def getA(self):
 		return self.USERS.A
 
+	@classmethod
+	def construct_from_param_dict(cls, param_dict):
+		return cls(dimension=param_dict["dimension"], alpha=param_dict["alpha"], lambda_=param_dict["lambda_"], n=param_dict["n_users"], W=param_dict["W"], update=param_dict["update"])
 
 class AsyCoLinUCBAlgorithm(CoLinUCBAlgorithm):
 	def __init__(self, dimension, alpha, lambda_, n, W, update='Inv'):

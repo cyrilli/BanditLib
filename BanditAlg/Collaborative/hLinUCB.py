@@ -129,6 +129,12 @@ class HLinUCBAlgorithm:
 		self.CanEstimateCoUserPreference = True 
 		self.CanEstimateW = False
 		self.CanEstimateV = True
+
+	@classmethod
+	def construct_from_param_dict(cls, param_dict):
+		return cls(context_dimension=param_dict["dimension"], latent_dimension=param_dict["latent_dimension"], alpha=param_dict["alpha"], alpha_2=param_dict["alpha_2"], lambda_=param_dict["lambda_"], 
+					n=param_dict["n_users"], itemNum=param_dict["itemNum"])
+
 	def decide(self, pool_articles, userID):
 		maxPTA = float('-inf')
 		articlePicked = None

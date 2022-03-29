@@ -4,149 +4,153 @@ from scipy.sparse.csgraph import connected_components
 from scipy.sparse import csr_matrix
 
 class LinUCBUserStruct:
-	def __init__(self, featureDimension, lambda_, init="zero"):
-		self.d = featureDimension
-		self.A = lambda_*np.identity(n = self.d)
-		self.b = np.zeros(self.d)
-		self.AInv = np.linalg.inv(self.A)
-		if (init=="random"):
-			self.UserTheta = np.random.rand(self.d)
-		else:
-			self.UserTheta = np.zeros(self.d)
-		self.time = 0
+    def __init__(self, featureDimension, lambda_, init="zero"):
+        self.d = featureDimension
+        self.A = lambda_*np.identity(n = self.d)
+        self.b = np.zeros(self.d)
+        self.AInv = np.linalg.inv(self.A)
+        if (init=="random"):
+            self.UserTheta = np.random.rand(self.d)
+        else:
+            self.UserTheta = np.zeros(self.d)
+        self.time = 0
 
-	def updateParameters(self, articlePicked_FeatureVector, click):
-		self.A += np.outer(articlePicked_FeatureVector,articlePicked_FeatureVector)
-		self.b += articlePicked_FeatureVector*click
-		self.AInv = np.linalg.inv(self.A)
-		self.UserTheta = np.dot(self.AInv, self.b)
-		self.time += 1
-	def getTheta(self):
-		return self.UserTheta
-	
-	def getA(self):
-		return self.A
+    def updateParameters(self, articlePicked_FeatureVector, click):
+        self.A += np.outer(articlePicked_FeatureVector,articlePicked_FeatureVector)
+        self.b += articlePicked_FeatureVector*click
+        self.AInv = np.linalg.inv(self.A)
+        self.UserTheta = np.dot(self.AInv, self.b)
+        self.time += 1
+    def getTheta(self):
+        return self.UserTheta
+    
+    def getA(self):
+        return self.A
 
-	def getProb(self, alpha, article_FeatureVector):
-		if alpha == -1:
-			alpha = alpha = 0.1*np.sqrt(np.log(self.time+1))
-		mean = np.dot(self.UserTheta,  article_FeatureVector)
-		var = np.sqrt(np.dot(np.dot(article_FeatureVector, self.AInv),  article_FeatureVector))
-		pta = mean + alpha * var
-		return pta
-	def getProb_plot(self, alpha, article_FeatureVector):
-		mean = np.dot(self.UserTheta,  article_FeatureVector)
-		var = np.sqrt(np.dot(np.dot(article_FeatureVector, self.AInv),  article_FeatureVector))
-		pta = mean + alpha * var
-		return pta, mean, alpha * var
+    def getProb(self, alpha, article_FeatureVector):
+        if alpha == -1:
+            alpha = alpha = 0.1*np.sqrt(np.log(self.time+1))
+        mean = np.dot(self.UserTheta,  article_FeatureVector)
+        var = np.sqrt(np.dot(np.dot(article_FeatureVector, self.AInv),  article_FeatureVector))
+        pta = mean + alpha * var
+        return pta
+    def getProb_plot(self, alpha, article_FeatureVector):
+        mean = np.dot(self.UserTheta,  article_FeatureVector)
+        var = np.sqrt(np.dot(np.dot(article_FeatureVector, self.AInv),  article_FeatureVector))
+        pta = mean + alpha * var
+        return pta, mean, alpha * var
 
 class CLUBUserStruct(LinUCBUserStruct):
-	def __init__(self,featureDimension,  lambda_, userID):
-		LinUCBUserStruct.__init__(self,featureDimension = featureDimension, lambda_= lambda_)
-		self.reward = 0
-		self.CA = self.A
-		self.Cb = self.b
-		self.CAInv = np.linalg.inv(self.CA)
-		self.CTheta = np.dot(self.CAInv, self.Cb)
-		self.I = lambda_*np.identity(n = featureDimension)	
-		self.counter = 0
-		self.CBPrime = 0
-		self.d = featureDimension
-	def updateParameters(self, articlePicked_FeatureVector, click,alpha_2):
-		#LinUCBUserStruct.updateParameters(self, articlePicked_FeatureVector, click)
-		#alpha_2 = 1
-		self.A += np.outer(articlePicked_FeatureVector,articlePicked_FeatureVector)
-		self.b += articlePicked_FeatureVector*click
-		self.AInv = np.linalg.inv(self.A)
-		self.UserTheta = np.dot(self.AInv, self.b)
-		self.counter+=1
-		self.CBPrime = alpha_2*np.sqrt(float(1+math.log10(1+self.counter))/float(1+self.counter))
+    def __init__(self,featureDimension,  lambda_, userID):
+        LinUCBUserStruct.__init__(self,featureDimension = featureDimension, lambda_= lambda_)
+        self.reward = 0
+        self.CA = self.A
+        self.Cb = self.b
+        self.CAInv = np.linalg.inv(self.CA)
+        self.CTheta = np.dot(self.CAInv, self.Cb)
+        self.I = lambda_*np.identity(n = featureDimension)	
+        self.counter = 0
+        self.CBPrime = 0
+        self.d = featureDimension
+    def updateParameters(self, articlePicked_FeatureVector, click,alpha_2):
+        #LinUCBUserStruct.updateParameters(self, articlePicked_FeatureVector, click)
+        #alpha_2 = 1
+        self.A += np.outer(articlePicked_FeatureVector,articlePicked_FeatureVector)
+        self.b += articlePicked_FeatureVector*click
+        self.AInv = np.linalg.inv(self.A)
+        self.UserTheta = np.dot(self.AInv, self.b)
+        self.counter+=1
+        self.CBPrime = alpha_2*np.sqrt(float(1+math.log10(1+self.counter))/float(1+self.counter))
 
-	def updateParametersofClusters(self,clusters,userID,Graph,users):
-		self.CA = self.I
-		self.Cb = np.zeros(self.d)
-		#print type(clusters)
+    def updateParametersofClusters(self,clusters,userID,Graph,users):
+        self.CA = self.I
+        self.Cb = np.zeros(self.d)
+        #print type(clusters)
 
-		for i in range(len(clusters)):
-			if clusters[i] == clusters[userID]:
-				self.CA += float(Graph[userID,i])*(users[i].A - self.I)
-				self.Cb += float(Graph[userID,i])*users[i].b
-		self.CAInv = np.linalg.inv(self.CA)
-		self.CTheta = np.dot(self.CAInv,self.Cb)
+        for i in range(len(clusters)):
+            if clusters[i] == clusters[userID]:
+                self.CA += float(Graph[userID,i])*(users[i].A - self.I)
+                self.Cb += float(Graph[userID,i])*users[i].b
+        self.CAInv = np.linalg.inv(self.CA)
+        self.CTheta = np.dot(self.CAInv,self.Cb)
 
-	def getProb(self, alpha, article_FeatureVector,time):
-		mean = np.dot(self.CTheta, article_FeatureVector)
-		var = np.sqrt(np.dot(np.dot(article_FeatureVector, self.CAInv),  article_FeatureVector))
-		pta = mean +  alpha * var*np.sqrt(math.log10(time+1))
-		return pta
+    def getProb(self, alpha, article_FeatureVector,time):
+        mean = np.dot(self.CTheta, article_FeatureVector)
+        var = np.sqrt(np.dot(np.dot(article_FeatureVector, self.CAInv),  article_FeatureVector))
+        pta = mean +  alpha * var*np.sqrt(math.log10(time+1))
+        return pta
 
 class CLUBAlgorithm():
-	def __init__(self,dimension,alpha,lambda_,n,alpha_2, cluster_init="Complete"):
-		self.time = 0
-		#N_LinUCBAlgorithm.__init__(dimension = dimension, alpha=alpha,lambda_ = lambda_,n=n)
-		self.users = []
-		#algorithm have n users, each user has a user structure
-		for i in range(n):
-			self.users.append(CLUBUserStruct(dimension,lambda_, i)) 
+    def __init__(self,dimension,alpha,lambda_,n,alpha_2, cluster_init="Complete"):
+        self.time = 0
+        #N_LinUCBAlgorithm.__init__(dimension = dimension, alpha=alpha,lambda_ = lambda_,n=n)
+        self.users = []
+        #algorithm have n users, each user has a user structure
+        for i in range(n):
+            self.users.append(CLUBUserStruct(dimension,lambda_, i)) 
 
-		self.dimension = dimension
-		self.alpha = alpha
-		self.alpha_2 = alpha_2
-		if (cluster_init=="Erdos-Renyi"):
-			p = 3*math.log(n)/n
-			self.Graph = np.random.choice([0, 1], size=(n,n), p=[1-p, p])
-			self.clusters = []
-			g = csr_matrix(self.Graph)
-			N_components, components = connected_components(g)
-		else:
-			self.Graph = np.ones([n,n]) 
-			self.clusters = []
-			g = csr_matrix(self.Graph)
-			N_components, components = connected_components(g)
+        self.dimension = dimension
+        self.alpha = alpha
+        self.alpha_2 = alpha_2
+        if (cluster_init=="Erdos-Renyi"):
+            p = 3*math.log(n)/n
+            self.Graph = np.random.choice([0, 1], size=(n,n), p=[1-p, p])
+            self.clusters = []
+            g = csr_matrix(self.Graph)
+            N_components, components = connected_components(g)
+        else:
+            self.Graph = np.ones([n,n]) 
+            self.clusters = []
+            g = csr_matrix(self.Graph)
+            N_components, components = connected_components(g)
 
-		self.CanEstimateCoUserPreference = False
-		self.CanEstimateUserPreference = False
-		self.CanEstimateW = False
-		self.CanEstimateV = False
-			
-	def decide(self,pool_articles,userID):
-		self.users[userID].updateParametersofClusters(self.clusters,userID,self.Graph, self.users)
-		maxPTA = float('-inf')
-		articlePicked = None
+        self.CanEstimateCoUserPreference = False
+        self.CanEstimateUserPreference = False
+        self.CanEstimateW = False
+        self.CanEstimateV = False
 
-		for x in pool_articles:
-			x_pta = self.users[userID].getProb(self.alpha, x.contextFeatureVector[:self.dimension],self.time)
-			# pick article with highest Prob
-			if maxPTA < x_pta:
-				articlePicked = x.id
-				featureVectorPicked = x.contextFeatureVector[:self.dimension]
-				picked = x
-				maxPTA = x_pta
-		self.time +=1
+    @classmethod
+    def construct_from_param_dict(cls, param_dict):
+        return cls(dimension=param_dict["dimension"], alpha=param_dict["alpha"], lambda_=param_dict["lambda_"], n=param_dict["n_users"], alpha_2=param_dict["alpha_2"], cluster_init=param_dict["cluster_init"])
 
-		return picked
-	def updateParameters(self, articlePicked, click,userID):
-		self.users[userID].updateParameters(articlePicked.contextFeatureVector[:self.dimension], click, self.alpha_2)
-	def updateGraphClusters(self,userID, binaryRatio):
-		n = len(self.users)
-		for j in range(n):
-			ratio = float(np.linalg.norm(self.users[userID].UserTheta - self.users[j].UserTheta,2))/float(self.users[userID].CBPrime + self.users[j].CBPrime)
-			#print float(np.linalg.norm(self.users[userID].UserTheta - self.users[j].UserTheta,2)),'R', ratio
-			if ratio > 1:
-				ratio = 0
-			elif binaryRatio == 'True':
-				ratio = 1
-			elif binaryRatio == 'False':
-				ratio = 1.0/math.exp(ratio)
-			#print 'ratio',ratio
-			self.Graph[userID][j] = ratio
-			self.Graph[j][userID] = self.Graph[userID][j]
-		N_components, component_list = connected_components(csr_matrix(self.Graph))
-		#print 'N_components:',N_components
-		self.clusters = component_list
-		return N_components
-	def getLearntParameters(self, userID):
-		return self.users[userID].UserTheta
+    def decide(self,pool_articles,userID):
+        self.users[userID].updateParametersofClusters(self.clusters,userID,self.Graph, self.users)
+        maxPTA = float('-inf')
+        articlePicked = None
+
+        for x in pool_articles:
+            x_pta = self.users[userID].getProb(self.alpha, x.contextFeatureVector[:self.dimension],self.time)
+            # pick article with highest Prob
+            if maxPTA < x_pta:
+                articlePicked = x.id
+                featureVectorPicked = x.contextFeatureVector[:self.dimension]
+                picked = x
+                maxPTA = x_pta
+        self.time +=1
+
+        return picked
+    def updateParameters(self, articlePicked, click,userID):
+        self.users[userID].updateParameters(articlePicked.contextFeatureVector[:self.dimension], click, self.alpha_2)
+    def updateGraphClusters(self,userID, binaryRatio):
+        n = len(self.users)
+        for j in range(n):
+            ratio = float(np.linalg.norm(self.users[userID].UserTheta - self.users[j].UserTheta,2))/float(self.users[userID].CBPrime + self.users[j].CBPrime)
+            #print float(np.linalg.norm(self.users[userID].UserTheta - self.users[j].UserTheta,2)),'R', ratio
+            if ratio > 1:
+                ratio = 0
+            elif binaryRatio == 'True':
+                ratio = 1
+            elif binaryRatio == 'False':
+                ratio = 1.0/math.exp(ratio)
+            #print 'ratio',ratio
+            self.Graph[userID][j] = ratio
+            self.Graph[j][userID] = self.Graph[userID][j]
+        N_components, component_list = connected_components(csr_matrix(self.Graph))
+        #print 'N_components:',N_components
+        self.clusters = component_list
+        return N_components
+    def getLearntParameters(self, userID):
+        return self.users[userID].UserTheta
 
 
 

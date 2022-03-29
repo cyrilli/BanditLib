@@ -65,6 +65,11 @@ class FactorUCBUserStruct:
 
 		self.BigW = np.kron(np.transpose(W), np.identity(n=self.d))
 		# self.U = np.zeros(self.d)
+
+	@classmethod
+	def construct_from_param_dict(cls, param_dict):
+		return cls(context_dimension=param_dict["dimension"], latent_dimension=param_dict["latent_dimension"], lambda_=param_dict["lambda_"], userNum=param_dict["n_users"], W=param_dict["W"])
+
 	def updateParameters(self, articles, clicks, userID):
 		self.time += len(articles)
 		for article, click in zip(articles, clicks):

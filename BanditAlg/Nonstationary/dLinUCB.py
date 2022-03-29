@@ -178,7 +178,13 @@ class dLinUCB:
         self.eta = eta
         self.CanEstimateUserPreference = True
         self.CanEstimateUserCluster= False
-        
+
+    @classmethod
+    def construct_from_param_dict(cls, param_dict):
+        return cls(dimension=param_dict["dimension"], alpha=param_dict["alpha"], lambda_=param_dict["lambda_"], NoiseScale=param_dict["NoiseScale"], tau=param_dict["tau"], delta_1=param_dict["delta_1"], delta_2=param_dict["delta_2"],
+                    tilde_delta_1=param_dict["tilde_delta_1"], eta=param_dict["eta"])
+
+
     def decide(self, pool_articles, userID):
         if userID not in self.users:
             self.users[userID] = MASTER(self.global_time)

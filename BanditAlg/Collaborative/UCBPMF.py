@@ -89,6 +89,12 @@ class UCBPMFAlgorithm:
 		self.CanEstimateCoUserPreference = False
 		self.CanEstimateW = False
 		self.CanEstimateV = False
+
+	@classmethod
+	def construct_from_param_dict(cls, param_dict):
+		return cls(dimension=param_dict["dimension"], alpha=param_dict["alpha"], sigma=param_dict["sigma"], sigmaU=param_dict["sigmaU"], sigmaV=param_dict["sigmaV"], 
+					n=param_dict["n_users"], itemNum=param_dict["itemNum"])
+
 	def decide(self, pool_articles, userID):
 
 		maxPTA = float('-inf')

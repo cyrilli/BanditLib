@@ -93,6 +93,12 @@ class PTSAlgorithm:
 		self.CanEstimateCoUserPreference = False
 		self.CanEstimateW = False
 		self.CanEstimateV = False
+
+	@classmethod
+	def construct_from_param_dict(cls, param_dict):
+		return cls(dimension=param_dict["dimension"], particle_num=param_dict["particle_num"], sigma=param_dict["sigma"], sigmaU=param_dict["sigmaU"], sigmaV=param_dict["sigmaV"], 
+					n=param_dict["n_users"], itemNum=param_dict["itemNum"])
+
 	def decide(self, pool_articles, userID):
 
 		#Sample a Particle

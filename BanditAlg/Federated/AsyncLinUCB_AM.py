@@ -131,6 +131,12 @@ class AsyncLinUCB_AM:
         # records
         self.totalCommCost = 0
 
+    @classmethod
+    def construct_from_param_dict(cls, param_dict):
+        return cls(dimension_g=param_dict["dimension_g"], dimension_l=param_dict["dimension_l"], alpha=param_dict["alpha"], lambda_=param_dict["lambda_"], delta_=param_dict["delta_"], NoiseScale=param_dict["NoiseScale"],
+                    gammaU=param_dict["gammaU"], gammaD=param_dict["gammaD"])
+
+
     def decide(self, pool_articles, clientID):
         if clientID not in self.clients:
             self.clients[clientID] = LocalClient(self.dimension_g, self.dimension_l, self.lambda_, self.delta_, self.NoiseScale)

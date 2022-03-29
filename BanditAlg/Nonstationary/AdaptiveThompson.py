@@ -132,6 +132,11 @@ class AdaptiveThompson:
 
         self.CanEstimateBeta = False
 
+    @classmethod
+    def construct_from_param_dict(cls, param_dict):
+        return cls(dimension=param_dict["dimension"], AdTS_Window=param_dict["AdTS_Window"] , AdTS_CheckInter=param_dict["AdTS_CheckInter"], sample_num=param_dict["sample_num"], v=param_dict["v"])
+
+
     def decide(self, pool_articles, userID):
         if userID not in self.users:
             self.users[userID] = AdaptiveThompsonUserStruct(self.dimension, self.AdTS_Window, self.AdTS_CheckInter)

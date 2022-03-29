@@ -211,6 +211,11 @@ class DyClu:
         self.CanEstimateUserPreference = True
         self.CanEstimateUserCluster = True
 
+    @classmethod
+    def construct_from_param_dict(cls, param_dict):
+        return cls(dimension=param_dict["dimension"], alpha=param_dict["alpha"], lambda_=param_dict["lambda_"], NoiseScale=param_dict["NoiseScale"], tau_e=param_dict["tau_e"], delta_1=param_dict["delta_1"], delta_2=param_dict["delta_2"],
+                    neighbor_identification_alpha=param_dict["neighbor_identification_alpha"], change_detection_alpha=param_dict["change_detection_alpha"])
+
     def decide(self, pool_articles, userID):
         # 1. Observe user and arm pool
         # if it's a new user, create a localUserModel for it

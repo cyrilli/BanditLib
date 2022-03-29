@@ -271,6 +271,12 @@ class DenBand:
         self.tilde_delta_1 = tilde_delta_1
         self._debug_counter = 0
 
+    @classmethod
+    def construct_from_param_dict(cls, param_dict):
+        return cls(dimension=param_dict["dimension"], alpha=param_dict["alpha"], lambda_=param_dict["lambda_"], tau=param_dict["tau"], NoiseScale=param_dict["NoiseScale"], delta_1=param_dict["delta_1"], delta_2=param_dict["delta_2"],
+                    tilde_delta_1=param_dict["tilde_delta_1"], delta_L=param_dict["delta_L"])
+
+
     def decide(self, pool_articles, userID, current_true_theta=None, changed=False):
         """
         pool_articles: a list of arms.

@@ -120,6 +120,11 @@ class FedGLB_UCB:
         self.totalCommCost = 0
         self.CanEstimateUserPreference = False  # set to true if want to record parameter estimation error
 
+    @classmethod
+    def construct_from_param_dict(cls, param_dict):
+        return cls(dimension=param_dict["dimension"], lambda_=param_dict["lambda_"], threshold=param_dict["threshold"], n_users=param_dict["n_users"], c_mu=param_dict["c_mu"], 
+                    delta_=param_dict["delta_"], R=param_dict["R"], alpha=param_dict["alpha"])
+
     # def decide(self, arm_matrix, currentClientID):
     #     # start = time.time()
     #     if currentClientID not in self.clients:
@@ -140,6 +145,7 @@ class FedGLB_UCB:
     #     # end = time.time()
     #     # print("v0 select takes: {}".format(end - start))
     #     return arm_matrix[arm], arm
+
 
     def decide(self, pool_articles, clientID):
         if clientID not in self.clients:

@@ -62,6 +62,10 @@ class GOBLinAlgorithm(CoLinUCBAlgorithm):
 		thetaMatrix =  matrixize(self.USERS.theta, self.dimension) 
 		return thetaMatrix.T[userID]
 
+	@classmethod
+	def construct_from_param_dict(cls, param_dict):
+		return cls(dimension=param_dict["dimension"], alpha=param_dict["alpha"], lambda_=param_dict["lambda_"], n=param_dict["n_users"], W=param_dict["W"])
+
 #inherite from CoLinUCB_SelectUserAlgorithm
 class GOBLin_SelectUserAlgorithm(CoLinUCB_SelectUserAlgorithm):
 	def __init__(self, dimension, alpha, lambda_, n, W):
