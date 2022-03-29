@@ -51,6 +51,10 @@ class LinUCB:
 
         self.CanEstimateUserPreference = True
 
+    @classmethod
+    def construct_from_param_dict(cls, param_dict):
+        return cls(dimension=param_dict["dimension"], alpha=param_dict["alpha"], lambda_=param_dict["lambda_"], delta_=param_dict["delta_"], NoiseScale=param_dict["NoiseScale"])
+
     def decide(self, pool_articles, userID):
         if userID not in self.users:
             self.users[userID] = LinUCBUserStruct(self.dimension, self.lambda_, self.delta_, self.NoiseScale)

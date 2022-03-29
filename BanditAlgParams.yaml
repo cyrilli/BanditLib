@@ -1,0 +1,10 @@
+# common parameters to be used for all algorithms
+common:
+  dimension: 25
+  NoiseScale: 0.01
+
+# parameters specific to each algorithm
+LinUCB:
+  alpha: -1
+  lambda_: 0.1
+  delta_: 1e-2

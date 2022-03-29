@@ -3,6 +3,10 @@ from math import log
 import numpy as np 
 from random import *
 from sklearn.decomposition import PCA
+from itertools import chain
+
+def dict_union(*args):
+    return dict(chain.from_iterable(d.items() for d in args))
 
 def pca_articles(articles, order):
     X = []
@@ -59,7 +63,7 @@ def gaussianFeature(dimension, argv):
 		vector = vector * (random())
 		vector = vector * argv['l2_limit']
 
-	if mean is not 0:
+	if mean != 0:
 		vector = vector + mean_vector
 
 	vectorNormalized = []
