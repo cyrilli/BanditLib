@@ -9,7 +9,7 @@ from scipy.spatial import distance
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
 from sklearn.decomposition import TruncatedSVD
-from BanditAlg.conf import *
+from Algorithms.conf import *
 
 class Article():
     def __init__(self, aid, FV=None):

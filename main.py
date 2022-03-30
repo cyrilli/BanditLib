@@ -5,8 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import datetime
 from dataset_utils import DataLoader
-from BanditAlg.util_functions import dict_union
-from BanditAlg.Standard.LinUCB import LinUCB
+from Algorithms.util_functions import dict_union
+from Algorithms.Standard.LinUCB import LinUCB
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = '')

@@ -19,7 +19,7 @@ from LinUCB import LinUCB
 from LinTS import LinTS
 from LinPHE import LinPHE
 
-save_address = "./BanditAlg/Standard/SimulationResults"
+save_address = "./Algorithms/Standard/SimulationResults"
 if not os.path.exists(save_address):
     os.makedirs(save_address)
 

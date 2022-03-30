@@ -17,7 +17,7 @@ from DisLinUCB import DisLinUCB
 from AsyncLinUCB_AM import AsyncLinUCB_AM
 from FedGLB_UCB import FedGLB_UCB
 
-save_address = "./BanditAlg/Federated/SimulationResults"
+save_address = "./Algorithms/Federated/SimulationResults"
 if not os.path.exists(save_address):
     os.makedirs(save_address)
 

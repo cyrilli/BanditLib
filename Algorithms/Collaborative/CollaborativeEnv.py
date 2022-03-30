@@ -1,5 +1,4 @@
 import numpy as np 
-from util_functions import featureUniform, gaussianFeature, fileOverWriteWarning
 import json
 from random import randint
 

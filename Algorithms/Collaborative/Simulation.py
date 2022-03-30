@@ -23,7 +23,7 @@ from PTS import PTSAlgorithm
 from UCBPMF import UCBPMFAlgorithm
 from GOBLin import GOBLinAlgorithm
 
-save_address = "./BanditAlg/Collaborative/SimulationResults"
+save_address = "./Algorithms/Collaborative/SimulationResults"
 if not os.path.exists(save_address):
     os.makedirs(save_address)
 

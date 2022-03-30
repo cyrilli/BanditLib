@@ -18,7 +18,7 @@ from CoDBand import CoDBand
 from DyClu import DyClu
 from DenBand import DenBand
 
-save_address = "./BanditAlg/Nonstationary/SimulationResults"
+save_address = "./Algorithms/Nonstationary/SimulationResults"
 if not os.path.exists(save_address):
     os.makedirs(save_address)
 
